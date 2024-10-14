@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+</head>
+<body>
+
+    <h1>OTP Verification</h1>
+    
+    <form id="otpForm">
+     
+        <label for="email">Enter your email:</label>
+        <input type="email" id="email" name="email" required placeholder="Enter your email">
+
+        <button type="button" id="generateOtpButton">
+            Generate OTP
+        </button>
+    </form>
+
+    <form id="verifyOtpForm">
+
+
+        <label for="otp">Enter OTP:</label>
+        <input type="text" id="otp" name="otp" required placeholder="Enter OTP">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('generateOtpButton').addEventListener('click', function() {
+            // Get email value from the input field
+            let email = document.getElementById('email').value;
+
+            // Check if email is entered
+            if (!email) {
+                alert('Please enter your email');
+                return;
+            }
+
+            // Make the fetch call to send the email for OTP generation
+            fetch('/generate-otp/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',  // Set content type to JSON
+                    'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token
+                },
+                body: JSON.stringify({ email: email })  // Send JSON data
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Show success message after OTP generation
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating OTP. Please try again.'); // Show error message
+            });
+        });
+
+        document.getElementById('verifyOtpForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent the default form submission
+            let otp = document.getElementById('otp').value; // Get OTP value
+
+            fetch('/verify-otp/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',  // Set content type to JSON
+                    'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token
+                },
+                body: JSON.stringify({ otp: otp })  // Send JSON data
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error); // Show success or error message
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error verifying OTP. Please try again.'); // Show error message
+            });
+        });
+    </script>
+
+</body> 
+</html>
